@@ -135,9 +135,9 @@ public class World {
 
             // Check and adjust room dimensions to avoid overlapping
             boolean fits = false;
+            // dimensions need to be > 2 in order to not be a hallway
             while (!fits && roomWidth > 2 && roomHeight > 2) {
                 fits = true;
-
                 // Check if this room would overlap with existing rooms
                 for (int x = roomX - 1; x <= roomX + roomWidth && fits; x++) {
                     for (int y = roomY - 1; y <= roomY + roomHeight && fits; y++) {
@@ -146,7 +146,6 @@ public class World {
                             fits = false;
                             break;
                         }
-
                         // Check if this position is already occupied by another room
                         if (occupied[x][y]) {
                             fits = false;
