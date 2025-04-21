@@ -11,7 +11,7 @@ public class World {
     private static final int HEIGHT = 30;
     private static int chunks;
 
-    private static final Random rand = new Random(6578897764558030256L);
+    private static final Random rand = new Random(6206686636164176845L);
 
     //helper methods for room generation
     public static int getRoomNums() {
@@ -122,6 +122,9 @@ public class World {
         int[][] chunkLocations = chunkAreas(chunks);
         int[][] roomLocations = getRoomLocations(chunkLocations);
 
+        // Keep track of where rooms have been placed
+        boolean[][] occupied = new boolean[WIDTH][HEIGHT];
+
         for (int i = 0; i < chunks; i++) {
             int roomWidth = getRoomWidth();
             int roomHeight = getRoomHeight();
@@ -130,9 +133,49 @@ public class World {
             int roomX = roomLocations[i][0];
             int roomY = roomLocations[i][1];
 
+            // Check and adjust room dimensions to avoid overlapping
+            boolean fits = false;
+            while (!fits && roomWidth > 2 && roomHeight > 2) {
+                fits = true;
+
+                // Check if this room would overlap with existing rooms
+                for (int x = roomX - 1; x <= roomX + roomWidth && fits; x++) {
+                    for (int y = roomY - 1; y <= roomY + roomHeight && fits; y++) {
+                        // Make sure coordinates are in bounds
+                        if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+                            fits = false;
+                            break;
+                        }
+
+                        // Check if this position is already occupied by another room
+                        if (occupied[x][y]) {
+                            fits = false;
+                            break;
+                        }
+                    }
+                }
+
+                // If room doesn't fit, reduce dimensions
+                if (!fits) {
+                    if (roomWidth > roomHeight) {
+                        roomWidth--;
+                    } else {
+                        roomHeight--;
+                    }
+                }
+            }
+
+            // Skip this room if it's too small
+            if (roomWidth <= 2 || roomHeight <= 2) {
+                continue;
+            }
+
             // Draw the room with walls around the edges
             for (int x = roomX - 1; x <= roomX + roomWidth; x++) {
                 for (int y = roomY - 1; y <= roomY + roomHeight; y++) {
+                    // Mark position as occupied
+                    occupied[x][y] = true;
+
                     // Check if we're at the perimeter
                     if (x == roomX - 1 || x == roomX + roomWidth ||
                         y == roomY - 1 || y == roomY + roomHeight) {
