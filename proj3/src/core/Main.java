@@ -23,6 +23,7 @@ public class Main {
         TETile[][] world = new TETile[WIDTH][HEIGHT];
         makeNothing(world);
         World.makeRooms(world);
+        World.makeHallways(world);
 
         ter.renderFrame(world);
     }
