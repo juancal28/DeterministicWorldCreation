@@ -7,11 +7,20 @@ import java.util.*;
 
 public class World {
 
-    private static final int WIDTH = 60;
-    private static final int HEIGHT = 30;
+    private static final int WIDTH = Main.WIDTH;
+    private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
-    private static final Random rand = new Random(4870229366887365062L);
+    private static final Random rand = new Random(2476468437338197851L);
+
+    //make blank world
+    public static void makeNothing(TETile[][] world) {
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                world[x][y] = Tileset.NOTHING;
+            }
+        }
+    }
 
     //helper methods for room generation
     public static int getRoomNums() {
