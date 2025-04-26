@@ -11,7 +11,11 @@ public class World {
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
-    private static final Random rand = new Random(2476468437338197851L);
+    private static Random rand = new Random(2476468437338197851L);
+
+    //constructor
+
+
 
     //make blank world
     public static void makeNothing(TETile[][] world) {
@@ -125,7 +129,6 @@ public class World {
 
         return roomPositions;
     }
-
     public static void makeRooms(TETile[][] world) {
         chunks = getRoomNums();
         int[][] chunkLocations = chunkAreas(chunks);
@@ -202,7 +205,6 @@ public class World {
             }
         }
     }
-
     public static void makeHallways(TETile[][] world) {
         if (roomMap.size() < 2) {
             return; // Not enough rooms to create hallways
@@ -299,5 +301,24 @@ public class World {
                 world[x2 - 1][y] = Tileset.WALL;
             }
         }
+    }
+
+    public static void makeNewWorld(TETile[][] world) {
+        makeNothing(world);
+        makeRooms(world);
+        makeHallways(world);
+    }
+
+    public static void changeSeed(long seed) {
+        rand = new Random(seed);
+    }
+
+
+    public static void saveWorld(TETile[][] world) {
+        // use information to save world
+    }
+
+    public static void restoreWorld(TETile[][] world) {
+        // use information to restore world
     }
 }

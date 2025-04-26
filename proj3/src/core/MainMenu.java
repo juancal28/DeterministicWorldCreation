@@ -13,14 +13,20 @@ public class MainMenu {
         this.ter = ter;
     }
 
-    public  void generateMenu(TETile[][] world) {
+    public MainMenu() {
+        // Default constructor
+        this.ter = new TERenderer();
+    }
+
+    public  void generateMenu() {
         int xCenter = Main.WIDTH / 2;
         int yCenter = Main.HEIGHT / 2;
 
 
         String title = "Welcome to the Game!";
 
-        ter.renderFrame(world);
+
+        StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setCanvasSize(Main.WIDTH * 16, Main.HEIGHT * 16);
         StdDraw.setXscale(0, Main.WIDTH);
         StdDraw.setYscale(0, Main.HEIGHT);
