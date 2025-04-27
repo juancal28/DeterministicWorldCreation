@@ -13,7 +13,7 @@ public class World {
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
     private static Random rand = new Random(2476468437338197851L);
 
-    //constructor
+    //constructors
 
 
 
