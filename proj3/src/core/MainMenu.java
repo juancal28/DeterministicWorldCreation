@@ -1,5 +1,5 @@
 package core;
-
+import java.util.*;
 import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TERenderer;
 import tileengine.TETile;
@@ -35,13 +35,14 @@ public class MainMenu {
         StdDraw.show();
 
         while (true){
-            if (StdDraw.hasNextKeyTyped()) {
+            while (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 if (key == 'n' || key == 'N') {
+                    StdDraw.clear();
                     World.makeNewWorld(Main.worlds.getFirst());
                     break;
                 } else if (key == 'l' || key == 'L') {
-
+                    //implement later
                     break;
                 } else if (key == 'q' || key == 'Q') {
                     System.exit(0);

@@ -257,13 +257,10 @@ public class World {
                 connectedRooms.add(roomToConnect);
 
                 // Create the physical hallway between these two rooms
-                createHallway(world,
-                    roomMap.get(connectToRoom),
-                    roomMap.get(roomToConnect));
+                createHallway(world, roomMap.get(connectToRoom), roomMap.get(roomToConnect));
             }
         }
     }
-
     private static void createHallway(TETile[][] world, HashMap<Integer, Integer> room1, HashMap<Integer, Integer> room2) {
         int x1 = room1.keySet().iterator().next();
         int y1 = room1.get(x1);
@@ -307,12 +304,12 @@ public class World {
         makeNothing(world);
         makeRooms(world);
         makeHallways(world);
+        Main.ter.renderFrame(world);
     }
 
     public static void changeSeed(long seed) {
         rand = new Random(seed);
     }
-
 
     public static void saveWorld(TETile[][] world) {
         // use information to save world
