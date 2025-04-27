@@ -33,5 +33,20 @@ public class MainMenu {
         StdDraw.text(xCenter, yCenter + 2, loadGame);
         StdDraw.text(xCenter, yCenter, quit);
         StdDraw.show();
+
+        while (true){
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = StdDraw.nextKeyTyped();
+                if (key == 'n' || key == 'N') {
+                    World.makeNewWorld(Main.worlds.getFirst());
+                    break;
+                } else if (key == 'l' || key == 'L') {
+
+                    break;
+                } else if (key == 'q' || key == 'Q') {
+                    System.exit(0);
+                }
+            }
+        }
     }
 }
