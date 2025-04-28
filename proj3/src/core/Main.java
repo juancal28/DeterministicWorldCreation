@@ -10,10 +10,11 @@ public class Main {
     public static final int WIDTH = 60;
     public static final int HEIGHT = 45;
     public static final int HUD_HEIGHT = 2;
-    public static ArrayList<TETile[][] > worlds = new ArrayList<>();
+    public static ArrayList<TETile[][]> worlds = new ArrayList<>();
     public static int worldIndex = 0;
     public static TETile[][] sight = new TETile[WIDTH][HEIGHT];
     public static TERenderer ter;
+    private static Metadata gameData;
 
 
 
@@ -26,33 +27,39 @@ public class Main {
         TETile[][] world1 = new TETile[WIDTH][HEIGHT];
         worlds.add(world1);
         World.makeNewWorld(world1);
+        long seed = World.getSeed();
 
 
         MainMenu menu = new MainMenu();
         menu.generateMenu();
+        Metadata gameData = new Metadata(seed, "Game" + worldIndex);
 
 
-        // World loop
         while (true) {
-            //Avatar movement
-            if (StdDraw.hasNextKeyTyped()) {
+
+            while (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 if (World.getSightToggle()){
                     Avatar.moveAvatar(key, sight);
+
                 } else {
                     Avatar.moveAvatar(key, worlds.get(worldIndex));
-                }
-                if (key == 'q' || key == 'Q') {
-                    System.exit(0);
+                    gameData.addInput(key);
+
                 }
                 if (key == 'm' || key == 'M') {
                     menu.generateMenu();
                 }
                 if (key == 'v' || key == 'V') {
                     World.sightToggle();
+
                 }
+                if (key == ':') {
+                    
+                }
+
             }
-            //HUD
+
             if (World.getSightToggle()) {
                 ter.renderFrame(sight);
             } else {

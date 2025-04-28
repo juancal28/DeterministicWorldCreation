@@ -11,13 +11,18 @@ public class World {
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
-    private static Random rand = new Random(2476468437338197851L);
+    private static long seed = 2476468437338197851L;
+    private static Random rand = new Random(seed);
     private static int[] startRoom = new int[2];
     public static boolean sightToggle = false;
 
     //useful for other methods
     public static int[] getStartRoom() {
         return startRoom;
+    }
+
+    public static long getSeed() {
+        return seed;
     }
 
 
@@ -308,8 +313,8 @@ public class World {
         makeNothing(world);
         makeRooms(world);
         makeHallways(world);
-        Main.ter.renderFrame(world);
         Avatar.placeAvatar(world);
+        Main.ter.renderFrame(world);
     }
 
     public static void sightToggle() {

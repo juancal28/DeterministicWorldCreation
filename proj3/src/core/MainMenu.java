@@ -38,22 +38,69 @@ public class MainMenu {
             while (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 if (key == 'n' || key == 'N') {
-                    StdDraw.clear();
-                    World.makeNewWorld(Main.worlds.get(Main.worldIndex));
-                    return;
+                    StdDraw.clear(StdDraw.BLACK);
+                    StdDraw.setPenColor(StdDraw.WHITE);
+                    StdDraw.setFont(menuFont);
+                    StdDraw.text(xCenter, yCenter + 6, "Enter 'G' to start a new game or a seed and then 'G' to start a game");
+                    StdDraw.show();
+                    while (true) {
+                        if (StdDraw.hasNextKeyTyped()) {
+                            char input = StdDraw.nextKeyTyped();
+                            if (input == 'g' || input == 'G') {
+                                TETile[][] newWorld = new TETile[Main.WIDTH][Main.HEIGHT];
+                                World.makeNewWorld(newWorld);
+                                Main.worlds.add(newWorld);
+                                Main.worldIndex++;
+                                return;
+                            } else if (Character.isDigit(input)) {
+                                long seed = Character.getNumericValue(input);
+                                World.changeSeed(seed);
+                            }
+                        }
+                    }
+
                 } else if (key == 'l' || key == 'L') {
                     StdDraw.clear(StdDraw.BLACK);
                     StdDraw.setPenColor(StdDraw.WHITE);
                     StdDraw.setFont(menuFont);
-                    StdDraw.text(xCenter, yCenter, "Enter seed!");
-                    // while (StdDraw.hasNextKeyTyped()) {
-
+                    StdDraw.text(xCenter, yCenter + 6, "click 'l' again to open most recent game or choose a game");
+                    // show worlds fromthe main.worlds array
+                    for (int i = 0; i < Main.worlds.size(); i++) {
+                        StdDraw.text(xCenter, yCenter + 4 - i, "Game " + i);
+                    }
                     StdDraw.show();
-                    break;
+                    while (true) {
+                        if (StdDraw.hasNextKeyTyped()) {
+                            char input = StdDraw.nextKeyTyped();
+                            if (input == 'l' || input == 'L') {
+                                //loadGame();
+                                return;
+                            } else if (Character.isDigit(input)) {
+                                int index = Character.getNumericValue(input);
+                                if (index >= 0 && index < Main.worlds.size()) {
+                                    //loadGame();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    //break;
                 } else if (key == 'q' || key == 'Q') {
                     System.exit(0);
                 }
             }
+        }
+    }
+
+    public void loadGame(Metadata info) {
+        TETile[][] newWorld = new TETile[Main.WIDTH][Main.HEIGHT];
+        World.changeSeed(info.getSeed());
+        World.makeNewWorld(newWorld);
+        Main.worlds.add(newWorld);
+        Main.worldIndex++;
+
+        for (char input : info.getInputs()) {
+            Avatar.moveAvatar(input, newWorld);
         }
     }
 }
