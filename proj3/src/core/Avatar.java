@@ -4,74 +4,91 @@ import tileengine.TETile;
 import tileengine.Tileset; // Import Tileset to use FLOOR, AVATAR etc.
 
 public class Avatar {
-    private int x;
-    private int y;
-    private final TETile tile; // The avatar's appearance
+    private static int avatarX;
+    private static int avatarY;
 
-    /**
-     * Constructor for the Avatar.
-     * @param startX The initial X coordinate.
-     * @param startY The initial Y coordinate.
-     * @param avatarTile The TETile representing the avatar.
-     */
-    public Avatar(int startX, int startY, TETile avatarTile) {
-        this.x = startX;
-        this.y = startY;
-        this.tile = avatarTile;
+    public static void placeAvatar(TETile[][] world) {
+        for (int x = 0; x < Main.WIDTH; x++) {
+            for (int y = 0; y < Main.HEIGHT; y++) {
+                if (world[x][y].description().equals("floor")) {
+                    avatarX = x;
+                    avatarY = y;
+                    world[x][y] = Tileset.AVATAR;
+                    return;
+                }
+            }
+        }
     }
 
-    /**
-     * Attempts to move the avatar in the given direction.
-     * Checks for world boundaries and wall collisions.
-     * Updates the avatar's internal coordinates only if the move is valid.
-     *
-     * @param direction The character representing the direction ('w', 'a', 's', 'd').
-     * @param world The world grid used for collision detection.
-     * @return true if the avatar successfully moved, false otherwise.
-     */
-    public boolean move(char direction, TETile[][] world) {
-        int targetX = this.x;
-        int targetY = this.y;
-        int worldWidth = world.length;
-        int worldHeight = world[0].length;
+    public static int[] getAvatarPosition() {
+        return new int[]{avatarX, avatarY};
+    }
 
-        // Calculate target coordinates
+    public static void moveAvatar(char direction, TETile[][] world) {
+        int targetX = avatarX;
+        int targetY = avatarY;
+
+        // Move avatar using WASD
         switch (Character.toLowerCase(direction)) {
-            case 'w': targetY++; break;
-            case 'a': targetX--; break;
-            case 's': targetY--; break;
-            case 'd': targetX++; break;
-            default: return false; // Not a movement key
+            case 'w':
+                targetY += 1;
+                break;
+            case 'a':
+                targetX -= 1;
+                break;
+            case 's':
+                targetY -= 1;
+                break;
+            case 'd':
+                targetX += 1;
+                break;
+            default:
+                return;
         }
 
-        // --- Collision and Bounds Detection ---
-        // Check bounds
-        if (targetX < 0 || targetX >= worldWidth || targetY < 0 || targetY >= worldHeight) {
-            return false; // Cannot move off map
+        if (targetX < 0 || targetX >= Main.WIDTH || targetY < 0 || targetY >= Main.HEIGHT) {
+            return;
         }
 
-        // Check target tile for walls
-        TETile targetTile = world[targetX][targetY];
-        if (targetTile.description().equals("wall")) {
-            return false; // Cannot move into a wall
+        // Always check if movement is valid in the actual world (not sight world)
+        TETile targetTile = Main.worlds.get(Main.worldIndex)[targetX][targetY];
+
+        // Check if the target tile is not a wall
+        if (!targetTile.description().equals("wall")) {
+            // Update the actual world
+            Main.worlds.get(Main.worldIndex)[avatarX][avatarY] = Tileset.FLOOR;
+            Main.worlds.get(Main.worldIndex)[targetX][targetY] = Tileset.AVATAR;
+
+            // Also update the sight world if it's being used
+            if (World.getSightToggle()) {
+                // Check if these positions are within the sight range before updating
+                if (Math.abs(avatarX - targetX) <= 2 && Math.abs(avatarY - targetY) <= 2) {
+                    Main.sight[avatarX][avatarY] = Tileset.FLOOR;
+                }
+                Main.sight[targetX][targetY] = Tileset.AVATAR;
+            }
+
+            avatarX = targetX;
+            avatarY = targetY;
+
+            // Update sight range if toggled
+            if (World.getSightToggle()) {
+                updateSightRange();
+            }
         }
-
-        // --- Move is Valid: Update internal coordinates ---
-        this.x = targetX;
-        this.y = targetY;
-        return true; // Move succeeded
     }
 
-    // --- Getters ---
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public TETile getTile() {
-        return tile;
+    private static void updateSightRange() {
+        // First reset all tiles outside visibility range back to NOTHING
+        for (int x = 0; x < Main.WIDTH; x++) {
+            for (int y = 0; y < Main.HEIGHT; y++) {
+                if (Math.abs(x - avatarX) <= 2 && Math.abs(y - avatarY) <= 2) {
+                    // Update tiles in sight range to match the actual world
+                    Main.sight[x][y] = Main.worlds.get(Main.worldIndex)[x][y];
+                } else {
+                    Main.sight[x][y] = Tileset.NOTHING;
+                }
+            }
+        }
     }
 }

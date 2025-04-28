@@ -12,67 +12,13 @@ public class World {
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
     private static Random rand = new Random(2476468437338197851L);
-    private static int avatarX;
-    private static int avatarY;
-
-    private static void placeAvatar(TETile[][] world) {
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                if (world[x][y].description().equals("floor")) {
-                    avatarX = x;
-                    avatarY = y;
-                    world[x][y] = Tileset.AVATAR;
-                    return;
-                }
-            }
-        }
-    }
-    public static void moveAvatar(char direction, TETile[][] world) {
-        int targetX = avatarX;
-        int targetY = avatarY;
-
-        // Move avatar using WASD
-        switch (Character.toLowerCase(direction)) {
-            case 'w':
-                targetY += 1;
-                break;
-            case 'a':
-                targetX -= 1;
-                break;
-            case 's':
-                targetY -= 1;
-                break;
-            case 'd':
-                targetX += 1;
-                break;
-            default:
-                return;
-        }
-
-        if (targetX < 0 || targetX >= WIDTH || targetY < 0 || targetY >= HEIGHT) {
-            return;
-        }
-
-        TETile targetTile = world[targetX][targetY];
-
-        // Check if the target tile is not a wall
-        if (!targetTile.description().equals("wall")) {
-            world[avatarX][avatarY] = Tileset.FLOOR;
-
-            avatarX = targetX;
-            avatarY = targetY;
-
-            // Place avatar at target location
-            world[avatarX][avatarY] = Tileset.AVATAR;
-        }
-    }
-    private static int[] startRoom = new int[2]; // x, y coordinates of the starting room
+    private static int[] startRoom = new int[2];
+    public static boolean sightToggle = false;
 
     //useful for other methods
     public static int[] getStartRoom() {
         return startRoom;
     }
-
 
 
     //make blank world
@@ -363,7 +309,45 @@ public class World {
         makeRooms(world);
         makeHallways(world);
         Main.ter.renderFrame(world);
-        placeAvatar(world);
+        Avatar.placeAvatar(world);
+    }
+
+    public static void sightToggle() {
+        if (!sightToggle) {
+            // Get avatar position from Avatar class
+            int[] avatarPos = Avatar.getAvatarPosition();
+            int avatarX = avatarPos[0];
+            int avatarY = avatarPos[1];
+
+            // Reset the sight board to NOTHING
+            for (int x = 0; x < WIDTH; x++) {
+                for (int y = 0; y < HEIGHT; y++) {
+                    // Calculate distance from avatar
+                    if (Math.abs(x - avatarX) <= 2 && Math.abs(y - avatarY) <= 2) {
+                        // Keep the same tile as in the world within 5x5 area around avatar
+                        Main.sight[x][y] = Main.worlds.get(Main.worldIndex)[x][y];
+                    } else {
+                        Main.sight[x][y] = Tileset.NOTHING;
+                    }
+                }
+            }
+            sightToggle = !sightToggle;
+        } else {
+            for (int x = 0; x < WIDTH; x++) {
+                for (int y = 0; y < HEIGHT; y++) {
+                    if (Main.sight[x][y] == Tileset.NOTHING) {
+                        Main.sight[x][y] = Tileset.FLOOR;
+                    }
+                }
+            }
+            sightToggle = !sightToggle;
+        }
+
+
+    }
+
+    public static boolean getSightToggle() {
+        return sightToggle;
     }
 
     public static void changeSeed(long seed) {
