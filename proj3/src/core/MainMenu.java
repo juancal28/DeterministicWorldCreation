@@ -39,7 +39,7 @@ public class MainMenu {
                 char key = StdDraw.nextKeyTyped();
                 if (key == 'n' || key == 'N') {
                     StdDraw.clear();
-                    World.makeNewWorld(Main.worlds.getFirst());
+                    World.makeNewWorld(Main.worlds.get(0));
                     break;
                 } else if (key == 'l' || key == 'L') {
                     //implement later

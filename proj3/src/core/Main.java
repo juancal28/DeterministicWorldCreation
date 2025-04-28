@@ -1,5 +1,6 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.*;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ public class Main {
 
     public static final int WIDTH = 60;
     public static final int HEIGHT = 45;
+    public static final int HUD_HEIGHT = 2;
     public static ArrayList<TETile[][] > worlds = new ArrayList<>();
     public static TERenderer ter;
 
@@ -16,13 +18,24 @@ public class Main {
         TERenderer ter = new TERenderer();
         Main.ter = ter;
         ter.initialize(WIDTH, HEIGHT);
+        StdDraw.setYscale(0, HEIGHT + HUD_HEIGHT);
         TETile[][] world1 = new TETile[WIDTH][HEIGHT];
         worlds.add(world1);
+        World.makeNewWorld(world1);
 
 
         MainMenu menu = new MainMenu();
         menu.generateMenu();
-        //World.makeNewWorld(world1);
+
+        // HUD
+        while (true) {
+            ter.renderFrame(world1);
+            HUD.currentBlock(world1);
+            StdDraw.show();
+            StdDraw.pause(16);
+        }
+
+
 
         //ter.renderFrame(world1);
     }
