@@ -27,8 +27,14 @@ public class Main {
         MainMenu menu = new MainMenu();
         menu.generateMenu();
 
-        // HUD
+        // World loop
         while (true) {
+            //Avatar movement
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = StdDraw.nextKeyTyped();
+                World.moveAvatar(key, world1);
+            }
+            //HUD
             ter.renderFrame(world1);
             HUD.currentBlock(world1);
             StdDraw.show();
