@@ -21,9 +21,9 @@ public class MainMenu {
         int xCenter = Main.WIDTH / 2;
         int yCenter = Main.HEIGHT / 2;
 
-        StdDraw.setCanvasSize(Main.WIDTH * 16, Main.HEIGHT * 16);
-        StdDraw.setXscale(0, Main.WIDTH);
-        StdDraw.setYscale(0, Main.HEIGHT);
+//        StdDraw.setCanvasSize(Main.WIDTH * 16, Main.HEIGHT * 16);
+//        StdDraw.setXscale(0, Main.WIDTH);
+//        StdDraw.setYscale(0, Main.HEIGHT);
         StdDraw.clear(StdDraw.BLACK);
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setFont(titleFont);
@@ -40,7 +40,7 @@ public class MainMenu {
                 if (key == 'n' || key == 'N') {
                     StdDraw.clear();
                     World.makeNewWorld(Main.worlds.get(0));
-                    break;
+                    return;
                 } else if (key == 'l' || key == 'L') {
                     //implement later
                     break;
