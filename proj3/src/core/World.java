@@ -12,8 +12,12 @@ public class World {
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
     private static Random rand = new Random(2476468437338197851L);
+    private static int[] startRoom = new int[2]; // x, y coordinates of the starting room
 
-    //constructors
+    //useful for other methods
+    public static int[] getStartRoom() {
+        return startRoom;
+    }
 
 
 
@@ -125,6 +129,10 @@ public class World {
             // Store the bottom-left position
             roomPositions[i][0] = roomX;
             roomPositions[i][1] = roomY;
+            if (i == 1) {
+                startRoom[0] = roomPositions[i][0]; // x coord
+                startRoom[1] = roomPositions[i][1]; // y coord
+            }
         }
 
         return roomPositions;
@@ -304,6 +312,7 @@ public class World {
         makeNothing(world);
         makeRooms(world);
         makeHallways(world);
+        Avatar.addCharacter(world);
         Main.ter.renderFrame(world);
     }
 
