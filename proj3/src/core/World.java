@@ -66,8 +66,12 @@ public class World {
             world[avatarX][avatarY] = Tileset.AVATAR;
         }
     }
+    private static int[] startRoom = new int[2]; // x, y coordinates of the starting room
 
-    //constructors
+    //useful for other methods
+    public static int[] getStartRoom() {
+        return startRoom;
+    }
 
 
 
@@ -359,7 +363,6 @@ public class World {
         makeRooms(world);
         makeHallways(world);
         Main.ter.renderFrame(world);
-        placeAvatar(world);
     }
 
     public static void changeSeed(long seed) {
