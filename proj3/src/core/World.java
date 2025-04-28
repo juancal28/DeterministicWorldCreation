@@ -363,6 +363,7 @@ public class World {
         makeRooms(world);
         makeHallways(world);
         Main.ter.renderFrame(world);
+        placeAvatar(world);
     }
 
     public static void changeSeed(long seed) {
