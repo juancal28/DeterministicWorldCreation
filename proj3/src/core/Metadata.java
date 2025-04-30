@@ -21,7 +21,7 @@ public class Metadata {
 
     public void addInput(char input) {
         input = Character.toLowerCase(input);
-        if (input == 'w' || input == 'a' || input == 's' || input == 'd') {
+        if (input == 'w' || input == 'a' || input == 's' || input == 'd' || input == 'v') {
             inputs.add(input);
             System.out.println("Input added: " + input);
         }

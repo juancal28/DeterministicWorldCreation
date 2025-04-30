@@ -1,17 +1,29 @@
 package core;
 
 import tileengine.*;
-
 import java.util.*;
 
 
 public class World {
 
+    // Define Edge class for Prim's MST algorithm
+    public static class Edge {
+        int from;
+        int to;
+        double weight;
+
+        public Edge(int from, int to, double weight) {
+            this.from = from;
+            this.to = to;
+            this.weight = weight;
+        }
+    }
+
     private static final int WIDTH = Main.WIDTH;
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
-    private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>();
-    private static long seed = 2476468437338197851L;
+    private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>(); // Map to store room coordinates
+    private static long seed = 4684546441732193677L;
     private static Random rand = new Random(seed);
     private static int[] startRoom = new int[2];
     public static boolean sightToggle = false;
@@ -38,80 +50,144 @@ public class World {
     //helper methods for room generation
     public static int getRoomNums() {
         int rooms;
-        if (rand.nextInt() % 2 == 0) {
-            rooms = 6;
+        int randomNum = rand.nextInt(100);
+        if (rand.nextInt() % 2 == 0 && randomNum < 50) {
+            rooms = 12; // 4 x 3 rooms
+        } else if (rand.nextInt() % 2 == 0 && randomNum >= 50) {
+            rooms = 11; // 4 rooms, 3 rooms, then 4 rooms again
+        } else if (rand.nextInt() % 2 == 1 && randomNum < 50) {
+            rooms = 13; // 4 rooms, 5 rooms, then 4 rooms again
         } else {
-            rooms = 8;
+            rooms = 14; // 5 rooms, 4 rooms, then 5 rooms again
         }
         return rooms;
     }
     public static int getRoomWidth() {
         int width;
         if (rand.nextInt() % 3 == 0) {
-            width = 5;
+            width = 3;
         } else if (rand.nextInt() % 3 == 1) {
-            width = 6;
+            width = 5;
         } else {
             width = 7;
         }
         return width;
     }
+
     public static int getRoomHeight() {
         int height;
         if (rand.nextInt() % 3 == 0) {
-            height = 6;
+            height = 2;
         } else if (rand.nextInt() % 3 == 1) {
-            height = 7;
+            height = 4;
         } else {
             height = 9;
         }
         return height;
     }
+
     public static int[][] chunkAreas(int roomNums) {
+        // split world into 3 rows. Each row then split into x amount of columns, depending on the number of rooms
         int[][] chunks = new int[roomNums][2]; // Array to store x,y coordinates of chunks
-        int minDistance = 2; // Minimum distance from world edge
-        int chunkSize = 6;   // Approximate size of each chunk for overlap calculation
 
-        // Calculate max bounds for chunk placement
-        int maxX = WIDTH - minDistance;
-        int maxY = HEIGHT - minDistance;
-
-        // Generate roomNums unique chunk locations
-        for (int i = 0; i < roomNums; i++) {
-            boolean validPosition = false;
-            int x = 0;
-            int y = 0;
-
-            int attempts = 0;
-            while (!validPosition && attempts < 100) {
-                // Generate a position that's at least minDistance away from the edges
-                x = minDistance + rand.nextInt(maxX - minDistance + 1);
-                y = minDistance + rand.nextInt(maxY - minDistance + 1);
-
-                // Check for overlap with existing chunks
-                validPosition = true;
-                for (int j = 0; j < i; j++) {
-                    // Calculate distance between current position and existing chunk
-                    int existingX = chunks[j][0];
-                    int existingY = chunks[j][1];
-
-                    // If chunks are too close to each other (less than chunkSize apart)
-                    if (Math.abs(x - existingX) < chunkSize && Math.abs(y - existingY) < chunkSize) {
-                        validPosition = false;
-                        break;
+        // when 12, standard 4 x 3
+        if (roomNums == 12) {
+            // split world into 3 rows
+            int rowHeight = HEIGHT / 3;
+            for (int i = 0; i < 3; i++) {
+                int rowY = i * rowHeight;
+                // split each row into columns
+                int colWidth = WIDTH / 4;
+                for (int j = 0; j < 4; j++) {
+                    int colX = j * colWidth;
+                    chunks[i * 4 + j][0] = colX;
+                    chunks[i * 4 + j][1] = rowY;
+                }
+            }
+        } else if (roomNums == 11) { // row w/ 4 rooms, then row w/ 3 rooms, then row w/ 4 rooms
+            // split world into 3 rows
+            int rowHeight = HEIGHT / 3;
+            for (int i = 0; i < 3; i++) {
+                int rowY = i * rowHeight;
+                // split each row into columns
+                if (i == 0) {
+                    for (int j = 0; j < 4; j++) {
+                        int colX = j * (WIDTH / 4);
+                        chunks[j][0] = colX;
+                        chunks[j][1] = rowY;
+                    }
+                } else if (i == 1) {
+                    for (int j = 0; j < 3; j++) {
+                        int colX = j * (WIDTH / 3);
+                        chunks[4 + j][0] = colX;
+                        chunks[4 + j][1] = rowY;
+                    }
+                } else {
+                    for (int j = 0; j < 4; j++) {
+                        int colX = j * (WIDTH / 4);
+                        chunks[7 + j][0] = colX;
+                        chunks[7 + j][1] = rowY;
                     }
                 }
-                attempts++;
             }
-
-            // Store the coordinates of the chunk
-            chunks[i][0] = x;
-            chunks[i][1] = y;
+        } else if (roomNums == 13) { // row w/ 4 rooms, then row w/ 5 rooms, then row w/ 4 rooms
+            // split world into 3 rows
+            int rowHeight = HEIGHT / 3;
+            for (int i = 0; i < 3; i++) {
+                int rowY = i * rowHeight;
+                // split each row into columns
+                if (i == 0) {
+                    for (int j = 0; j < 4; j++) {
+                        int colX = j * (WIDTH / 4);
+                        chunks[j][0] = colX;
+                        chunks[j][1] = rowY;
+                    }
+                } else if (i == 1) {
+                    for (int j = 0; j < 5; j++) {
+                        int colX = j * (WIDTH / 5);
+                        chunks[4 + j][0] = colX;
+                        chunks[4 + j][1] = rowY;
+                    }
+                } else {
+                    for (int j = 0; j < 4; j++) {
+                        int colX = j * (WIDTH / 4);
+                        chunks[9 + j][0] = colX;
+                        chunks[9 + j][1] = rowY;
+                    }
+                }
+            }
+        } else if (roomNums == 14) { // row w/ 5 rooms, then row w/ 4 rooms, then row w/ 5 rooms
+            // split world into 3 rows
+            int rowHeight = HEIGHT / 3;
+            for (int i = 0; i < 3; i++) {
+                int rowY = i * rowHeight;
+                // split each row into columns
+                if (i == 0) {
+                    for (int j = 0 ; j < 5; j++) {
+                        int colX = j * (WIDTH / 5);
+                        chunks[j][0] = colX;
+                        chunks[j][1] = rowY;
+                    }
+                } else if (i == 1) {
+                    for (int j = 0; j < 4; j++) {
+                        int colX = j * (WIDTH / 4);
+                        chunks[5 + j][0] = colX;
+                        chunks[5 + j][1] = rowY;
+                    }
+                } else {
+                    for (int j = 0; j < 5; j++) {
+                        int colX = j * (WIDTH / 5);
+                        chunks[9 + j][0] = colX;
+                        chunks[9 + j][1] = rowY;
+                    }
+                }
+            }
         }
 
         return chunks;
     }
-    public static int[][] getRoomLocations(int[][] chunks) {
+
+    public static int[][] getRoomLocations(int[][] chunks) { // determine the location for the rooms
         int[][] roomPositions = new int[chunks.length][2]; // Array to store bottom-left positions of rooms
 
         for (int i = 0; i < chunks.length; i++) {
@@ -138,7 +214,8 @@ public class World {
 
         return roomPositions;
     }
-    public static void makeRooms(TETile[][] world) {
+
+    public static void makeRooms(TETile[][] world) { // actually make the rooms in the TETile
         chunks = getRoomNums();
         int[][] chunkLocations = chunkAreas(chunks);
         int[][] roomLocations = getRoomLocations(chunkLocations);
@@ -214,7 +291,7 @@ public class World {
             }
         }
     }
-    public static void makeHallways(TETile[][] world) {
+    public static void makeHallwayPaths(TETile[][] world) {
         if (roomMap.size() < 2) {
             return; // Not enough rooms to create hallways
         }
@@ -239,42 +316,65 @@ public class World {
         int firstRoom = roomIds.get(0);
         connectedRooms.add(firstRoom);
 
-        // Connect all rooms using Prim's algorithm
-        while (connectedRooms.size() < roomMap.size()) {
-            double minDistance = Double.MAX_VALUE;
-            int roomToConnect = -1;
-            int connectToRoom = -1;
 
-            // Find the closest unconnected room to any connected room
-            for (int connectedId : connectedRooms) {
-                for (int unconnectedId : roomIds) {
-                    if (!connectedRooms.contains(unconnectedId)) {
-                        // Use the RoomGraph's getEdgeWeight method instead of calculating distance separately
-                        double distance = roomGraph.getEdgeWeight(connectedId, unconnectedId);
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            roomToConnect = unconnectedId;
-                            connectToRoom = connectedId;
-                        }
+
+        // Connect all rooms using Prim's algorithm with priority queue
+        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingDouble(e -> e.weight));
+        Map<Integer, Double> distanceTo = new HashMap<>();
+        Map<Integer, Integer> edgeTo = new HashMap<>();
+        Set<Integer> visited = new HashSet<>();
+
+        // Initialize with first room
+        visited.add(firstRoom);
+        connectedRooms.add(firstRoom);
+
+        // Add all edges from first room to priority queue
+        for (int toRoom : roomIds) {
+            if (toRoom != firstRoom) {
+                double weight = roomGraph.getEdgeWeight(firstRoom, toRoom);
+                distanceTo.put(toRoom, weight);
+                edgeTo.put(toRoom, firstRoom);
+                pq.offer(new Edge(firstRoom, toRoom, weight));
+            }
+        }
+
+        // Process edges in order of increasing weight
+        while (!pq.isEmpty() && connectedRooms.size() < roomMap.size()) {
+            Edge edge = pq.poll();
+            int to = edge.to;
+
+            // Skip if we've already visited this room
+            if (visited.contains(to)) {
+                continue;
+            }
+
+            // Add this edge to our solution
+            roomGraph.addEdge(edgeTo.get(to), to);
+            visited.add(to);
+            connectedRooms.add(to);
+
+            // Create the physical hallway between these two rooms
+            createHallway(world, roomMap.get(edgeTo.get(to)), roomMap.get(to));
+
+            // Add new edges from this room to the priority queue
+            for (int nextRoom : roomIds) {
+                if (!visited.contains(nextRoom)) {
+                    double weight = roomGraph.getEdgeWeight(to, nextRoom);
+                    if (!distanceTo.containsKey(nextRoom) || weight < distanceTo.get(nextRoom)) {
+                        distanceTo.put(nextRoom, weight);
+                        edgeTo.put(nextRoom, to);
+                        pq.offer(new Edge(to, nextRoom, weight));
                     }
                 }
             }
-
-            // Add the edge to our graph
-            if (roomToConnect != -1) {
-                roomGraph.addEdge(connectToRoom, roomToConnect);
-                connectedRooms.add(roomToConnect);
-
-                // Create the physical hallway between these two rooms
-                createHallway(world, roomMap.get(connectToRoom), roomMap.get(roomToConnect));
-            }
         }
     }
+
     private static void createHallway(TETile[][] world, HashMap<Integer, Integer> room1, HashMap<Integer, Integer> room2) {
         int x1 = room1.keySet().iterator().next();
-        int y1 = room1.get(x1);
+        int y1 = room1.get(x1) + rand.nextInt(4) + 1;
         int x2 = room2.keySet().iterator().next();
-        int y2 = room2.get(x2);
+        int y2 = room2.get(x2) + rand.nextInt((2));
 
         // Create horizontal hallway first
         int minX = Math.min(x1, x2);
@@ -312,7 +412,7 @@ public class World {
     public static void makeNewWorld(TETile[][] world) {
         makeNothing(world);
         makeRooms(world);
-        makeHallways(world);
+        makeHallwayPaths(world);
         Avatar.placeAvatar(world);
         Main.ter.renderFrame(world);
     }

@@ -10,40 +10,48 @@ public class Main {
     public static final int WIDTH = 60;
     public static final int HEIGHT = 45;
     public static final int HUD_HEIGHT = 2;
-    public static ArrayList<TETile[][]> worlds = new ArrayList<>();
-    public static int worldIndex = 0;
+    public static ArrayList<TETile[][]> worlds = new ArrayList<>(Saving.loadGameIndex() + 1);
+
+    public static int worldIndex = Saving.loadGameIndex();
     public static TETile[][] sight = new TETile[WIDTH][HEIGHT];
     public static TERenderer ter;
-    private static Metadata gameData;
+    static Metadata gameData;
 
+    public static void updateWorldIndex (int index) {
+        worldIndex = index;
+    }
 
 
     public static void main(String[] args) {
-
         TERenderer ter = new TERenderer();
         Main.ter = ter;
         ter.initialize(WIDTH, HEIGHT);
         StdDraw.setYscale(0, HEIGHT + HUD_HEIGHT);
-        TETile[][] world1 = new TETile[WIDTH][HEIGHT];
-        worlds.add(world1);
-        World.makeNewWorld(world1);
+        // Ensure worlds has enough elements
+        for (int i = worlds.size(); i < worldIndex; i++) {
+            worlds.add(new TETile[WIDTH][HEIGHT]);
+        }
+
+        //TETile[][] world1 = new TETile[WIDTH][HEIGHT];
+        //worlds.add(world1);
+        //World.makeNewWorld(worlds.get(worldIndex));
         long seed = World.getSeed();
 
 
+        // make sure to update the worldIndex utilizing the saving method
         MainMenu menu = new MainMenu();
         menu.generateMenu();
         Metadata gameData = new Metadata(seed, "Game" + worldIndex);
 
-
+        boolean clickedColon = false;
         while (true) {
-
-            while (StdDraw.hasNextKeyTyped()) {
+            if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 if (World.getSightToggle()){
                     Avatar.moveAvatar(key, sight);
 
                 } else {
-                    Avatar.moveAvatar(key, worlds.get(worldIndex));
+                    Avatar.moveAvatar(key, Main.worlds.get(worldIndex));
                     gameData.addInput(key);
 
                 }
@@ -52,10 +60,14 @@ public class Main {
                 }
                 if (key == 'v' || key == 'V') {
                     World.sightToggle();
-
                 }
                 if (key == ':') {
-                    
+                    clickedColon = true;
+                }
+                if (clickedColon && key == 'q' || key == 'Q') {
+                    Saving.saveGame(gameData);
+                    clickedColon = false;
+                    System.exit(0);
                 }
 
             }
@@ -65,9 +77,9 @@ public class Main {
             } else {
                 ter.renderFrame(worlds.get(worldIndex));
             }
-            HUD.currentBlock(world1);
+            HUD.currentBlock(worlds.get(worldIndex));
             StdDraw.show();
-            StdDraw.pause(16);
+            StdDraw.pause(10);
         }
 
 

@@ -43,6 +43,7 @@ public class MainMenu {
                     StdDraw.setFont(menuFont);
                     StdDraw.text(xCenter, yCenter + 6, "Enter 'G' to start a new game or a seed and then 'G' to start a game");
                     StdDraw.show();
+                    StringBuilder seedBuilder = new StringBuilder();
                     while (true) {
                         if (StdDraw.hasNextKeyTyped()) {
                             char input = StdDraw.nextKeyTyped();
@@ -50,10 +51,19 @@ public class MainMenu {
                                 TETile[][] newWorld = new TETile[Main.WIDTH][Main.HEIGHT];
                                 World.makeNewWorld(newWorld);
                                 Main.worlds.add(newWorld);
-                                Main.worldIndex++;
                                 return;
                             } else if (Character.isDigit(input)) {
-                                long seed = Character.getNumericValue(input);
+                                seedBuilder.append(input);
+                                // Update displayed seed
+                                StdDraw.clear(StdDraw.BLACK);
+                                StdDraw.setPenColor(StdDraw.WHITE);
+                                StdDraw.setFont(menuFont);
+                                StdDraw.text(xCenter, yCenter + 6, "Enter 'G' to start a new game or a seed and then 'G' to start a game");
+                                StdDraw.text(xCenter, yCenter + 4, "Current Seed: " + seedBuilder.toString());
+                                StdDraw.show();
+
+                                // Convert seed string to long
+                                long seed = Long.parseLong(seedBuilder.toString());
                                 World.changeSeed(seed);
                             }
                         }
@@ -73,7 +83,7 @@ public class MainMenu {
                         if (StdDraw.hasNextKeyTyped()) {
                             char input = StdDraw.nextKeyTyped();
                             if (input == 'l' || input == 'L') {
-                                //loadGame();
+                                Saving.loadGame();
                                 return;
                             } else if (Character.isDigit(input)) {
                                 int index = Character.getNumericValue(input);
