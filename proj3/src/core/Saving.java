@@ -14,7 +14,7 @@ public class Saving {
         String fileName = SAVE_PREFIX + Main.worldIndex + EXTENSION;
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(fileName))) {
             // Save seed
-            writer.println("SEED:" + gameData.getSeed());
+            writer.println("SEED:" + Main.gameData.getSeed());
             // Save name
             writer.println("NAME:" + gameData.getName());
             // Save movements
@@ -58,6 +58,24 @@ public class Saving {
         }
     }
 
+    public static void replayGame(Metadata gameData) {
+        World.changeSeed(gameData.getSeed());
+        Main.worlds.set(Main.worldIndex, new TETile[Main.WIDTH][Main.HEIGHT]);
+        TETile[][] world = Main.worlds.get(Main.worldIndex);
+        World.makeNewWorld(world);
+
+        // Replay the movements
+        for (char c : gameData.getInputs()) {
+            Avatar.moveAvatar(c, world);
+            Main.ter.renderFrame(world);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                System.out.println("Replay interrupted: " + e.getMessage());
+            }
+        }
+    }
+
     public static void loadGame(int index) {
         String fileName = SAVE_PREFIX + index + EXTENSION;
         try (Scanner scanner = new Scanner(new File(fileName))) {
@@ -80,13 +98,19 @@ public class Saving {
             World.changeSeed(seed);
             TETile[][] world = new TETile[Main.WIDTH][Main.HEIGHT];
             World.makeNewWorld(world);
-            Main.worlds.set(index, world);
+            Main.worlds.add(world);
+
+            // Create metadata object with the loaded information
+            Metadata gameData = new Metadata(seed, name);
 
             // Replay the movements
             for (char c : movements.toCharArray()) {
                 Avatar.moveAvatar(c, world);
+                gameData.addInput(c);
             }
 
+            // Set the current game data in Main
+            Main.gameData = gameData;
             System.out.println("Game loaded successfully from " + fileName);
         } catch (FileNotFoundException e) {
             System.out.println("No save file found: " + e.getMessage());

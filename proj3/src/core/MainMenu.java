@@ -1,7 +1,5 @@
 package core;
-import java.util.*;
 import edu.princeton.cs.algs4.StdDraw;
-import tileengine.TERenderer;
 import tileengine.TETile;
 
 import java.awt.*;
@@ -14,7 +12,15 @@ public class MainMenu {
     final String quit = "(Q) Quit";
     Font titleFont = new Font("Arcade Classic", Font.BOLD, 40);
     Font menuFont = new Font("Arcade Classic", Font.PLAIN, 20);
+    boolean paused = false;
 
+    public void pauseGame() {
+        paused = !paused;
+    }
+
+    public void printPauseStatus() {
+        System.out.println(paused);
+    }
 
 
     public  void generateMenu() {
@@ -44,15 +50,20 @@ public class MainMenu {
                     StdDraw.text(xCenter, yCenter + 6, "Enter 'G' to start a new game or a seed and then 'G' to start a game");
                     StdDraw.show();
                     StringBuilder seedBuilder = new StringBuilder();
+                    int clickCounter = 0;
                     while (true) {
                         if (StdDraw.hasNextKeyTyped()) {
                             char input = StdDraw.nextKeyTyped();
                             if (input == 'g' || input == 'G') {
                                 TETile[][] newWorld = new TETile[Main.WIDTH][Main.HEIGHT];
+                                if (clickCounter != 0) {
+                                    World.changeSeed(Long.parseLong(seedBuilder.toString()));
+                                }
                                 World.makeNewWorld(newWorld);
                                 Main.worlds.add(newWorld);
                                 return;
                             } else if (Character.isDigit(input)) {
+                                clickCounter++;
                                 seedBuilder.append(input);
                                 // Update displayed seed
                                 StdDraw.clear(StdDraw.BLACK);
@@ -83,12 +94,16 @@ public class MainMenu {
                         if (StdDraw.hasNextKeyTyped()) {
                             char input = StdDraw.nextKeyTyped();
                             if (input == 'l' || input == 'L') {
-                                Saving.loadGame();
+                                if (!paused){
+                                    Saving.loadGame();
+                                } else {
+                                    Saving.replayGame(Main.gameData);
+                                }
                                 return;
                             } else if (Character.isDigit(input)) {
                                 int index = Character.getNumericValue(input);
                                 if (index >= 0 && index < Main.worlds.size()) {
-                                    //loadGame();
+                                    Saving.loadGame(index);
                                     return;
                                 }
                             }

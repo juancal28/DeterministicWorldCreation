@@ -19,6 +19,10 @@ public class Metadata {
         return name;
     }
 
+    public void changeSeed(long seed) {
+        this.seed = seed;
+    }
+
     public void addInput(char input) {
         input = Character.toLowerCase(input);
         if (input == 'w' || input == 'a' || input == 's' || input == 'd' || input == 'v') {

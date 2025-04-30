@@ -11,11 +11,10 @@ public class Main {
     public static final int HEIGHT = 45;
     public static final int HUD_HEIGHT = 2;
     public static ArrayList<TETile[][]> worlds = new ArrayList<>(Saving.loadGameIndex() + 1);
-
     public static int worldIndex = Saving.loadGameIndex();
     public static TETile[][] sight = new TETile[WIDTH][HEIGHT];
     public static TERenderer ter;
-    static Metadata gameData;
+    static Metadata gameData = null;
 
     public static void updateWorldIndex (int index) {
         worldIndex = index;
@@ -35,27 +34,30 @@ public class Main {
         //TETile[][] world1 = new TETile[WIDTH][HEIGHT];
         //worlds.add(world1);
         //World.makeNewWorld(worlds.get(worldIndex));
-        long seed = World.getSeed();
 
 
         // make sure to update the worldIndex utilizing the saving method
         MainMenu menu = new MainMenu();
         menu.generateMenu();
-        Metadata gameData = new Metadata(seed, "Game" + worldIndex);
+        gameData.changeSeed(World.getSeed());
 
         boolean clickedColon = false;
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
+                gameData.addInput(key);
+                System.out.println(gameData.getInputs().toString());
                 if (World.getSightToggle()){
                     Avatar.moveAvatar(key, sight);
 
                 } else {
                     Avatar.moveAvatar(key, Main.worlds.get(worldIndex));
-                    gameData.addInput(key);
 
                 }
                 if (key == 'm' || key == 'M') {
+                    menu.pauseGame();
+                    menu.printPauseStatus();
+                    System.out.println("Game paused");
                     menu.generateMenu();
                 }
                 if (key == 'v' || key == 'V') {

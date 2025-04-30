@@ -371,6 +371,7 @@ public class World {
     }
 
     private static void createHallway(TETile[][] world, HashMap<Integer, Integer> room1, HashMap<Integer, Integer> room2) {
+        Random tempRand = new Random(seed);
         int x1 = room1.keySet().iterator().next();
         int y1 = room1.get(x1) + rand.nextInt(4) + 1;
         int x2 = room2.keySet().iterator().next();
@@ -414,6 +415,7 @@ public class World {
         makeRooms(world);
         makeHallwayPaths(world);
         Avatar.placeAvatar(world);
+        Main.gameData = new Metadata(seed, "Game" + Main.worldIndex);
         Main.ter.renderFrame(world);
     }
 
@@ -424,40 +426,93 @@ public class World {
             int avatarX = avatarPos[0];
             int avatarY = avatarPos[1];
 
+            // Vision radius
+            int visionRadius = 5;
+
             // Reset the sight board to NOTHING
             for (int x = 0; x < WIDTH; x++) {
                 for (int y = 0; y < HEIGHT; y++) {
-                    // Calculate distance from avatar
-                    if (Math.abs(x - avatarX) <= 2 && Math.abs(y - avatarY) <= 2) {
-                        // Keep the same tile as in the world within 5x5 area around avatar
+                    Main.sight[x][y] = Tileset.NOTHING;
+                }
+            }
+
+            // Check visibility in all directions within radius
+            for (int x = Math.max(0, avatarX - visionRadius); x < Math.min(WIDTH, avatarX + visionRadius + 1); x++) {
+                for (int y = Math.max(0, avatarY - visionRadius); y < Math.min(HEIGHT, avatarY + visionRadius + 1); y++) {
+                    // Skip if position is out of bounds
+                    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+                        continue;
+                    }
+
+                    // Check line of sight from avatar to this position
+                    if (hasLineOfSight(avatarX, avatarY, x, y, Main.worlds.get(Main.worldIndex))) {
                         Main.sight[x][y] = Main.worlds.get(Main.worldIndex)[x][y];
-                    } else {
-                        Main.sight[x][y] = Tileset.NOTHING;
                     }
                 }
             }
+
             sightToggle = !sightToggle;
         } else {
-            for (int x = 0; x < WIDTH; x++) {
-                for (int y = 0; y < HEIGHT; y++) {
-                    if (Main.sight[x][y] == Tileset.NOTHING) {
-                        Main.sight[x][y] = Tileset.FLOOR;
-                    }
-                }
-            }
+            // Toggle back to normal view
             sightToggle = !sightToggle;
         }
+    }
 
+    // Checks if there's a clear line of sight between two points using Bresenham's line algorithm
+    private static boolean hasLineOfSight(int x0, int y0, int x1, int y1, TETile[][] world) {
+        // If this is the avatar's position, always visible
+        if (x0 == x1 && y0 == y1) {
+            return true;
+        }
 
+        // Calculate distance
+        int distance = (int) Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
+        if (distance > 5) {
+            return false; // Beyond vision radius
+        }
+
+        // Use Bresenham's line algorithm to trace a line between points
+        int dx = Math.abs(x1 - x0);
+        int dy = Math.abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
+        int x = x0;
+        int y = y0;
+
+        while (true) {
+            // If we've reached the endpoint, it's visible
+            if (x == x1 && y == y1) {
+                return true;
+            }
+
+            // Move to next position
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y += sy;
+            }
+
+            // Check if this position has a wall (and it's not the endpoint)
+            if ((x != x1 || y != y1) && world[x][y] == Tileset.WALL) {
+                return false;
+            }
+        }
     }
 
     public static boolean getSightToggle() {
         return sightToggle;
     }
 
-    public static void changeSeed(long seed) {
-        rand = new Random(seed);
+    public static void changeSeed(long newSeed) {
+        seed = newSeed;
+        rand = new Random(newSeed);
     }
+
 
     public static void saveWorld(TETile[][] world) {
         // use information to save world

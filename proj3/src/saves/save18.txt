@@ -1,0 +1,4 @@
+SEED:4684546441732193677
+NAME:Game17
+MOVEMENTS:ddddddwwwwdddddd
+Game Index: 18

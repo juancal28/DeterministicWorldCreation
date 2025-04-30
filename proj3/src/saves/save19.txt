@@ -1,0 +1,4 @@
+SEED:123123
+NAME:Game18
+MOVEMENTS:wwwwwwwwww
+Game Index: 19
