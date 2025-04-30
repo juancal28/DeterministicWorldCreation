@@ -23,7 +23,7 @@ public class World {
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>(); // Map to store room coordinates
-    private static long seed = 4684546441732193677L;
+    private static long seed = 5519969932840662953L; // Default seed
     private static Random rand = new Random(seed);
     private static int[] startRoom = new int[2];
     public static boolean sightToggle = false;
@@ -377,6 +377,9 @@ public class World {
         int x2 = room2.keySet().iterator().next();
         int y2 = room2.get(x2) + rand.nextInt((2));
 
+        x1 += tempRand.nextInt(4) + 1;
+        x2 += tempRand.nextInt(2);
+
         // Create horizontal hallway first
         int minX = Math.min(x1, x2);
         int maxX = Math.max(x1, x2);
@@ -460,18 +463,17 @@ public class World {
 
     // Checks if there's a clear line of sight between two points using Bresenham's line algorithm
     private static boolean hasLineOfSight(int x0, int y0, int x1, int y1, TETile[][] world) {
-        // If this is the avatar's position, always visible
         if (x0 == x1 && y0 == y1) {
             return true;
         }
 
-        // Calculate distance
         int distance = (int) Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
         if (distance > 5) {
             return false; // Beyond vision radius
         }
 
-        // Use Bresenham's line algorithm to trace a line between points
+        // @Source https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+        // @Source ChatGPT pointed me to this algorithm
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1;
@@ -481,12 +483,10 @@ public class World {
         int y = y0;
 
         while (true) {
-            // If we've reached the endpoint, it's visible
             if (x == x1 && y == y1) {
                 return true;
             }
 
-            // Move to next position
             int e2 = 2 * err;
             if (e2 > -dy) {
                 err -= dy;
@@ -497,7 +497,6 @@ public class World {
                 y += sy;
             }
 
-            // Check if this position has a wall (and it's not the endpoint)
             if ((x != x1 || y != y1) && world[x][y] == Tileset.WALL) {
                 return false;
             }
