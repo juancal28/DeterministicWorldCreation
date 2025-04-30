@@ -23,10 +23,11 @@ public class World {
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>(); // Map to store room coordinates
-    private static long seed = 5519969932840662953L; // Default seed
+    private static long seed = 4870229366887365062L; // Default seed
     private static Random rand = new Random(seed);
     private static int[] startRoom = new int[2];
     public static boolean sightToggle = false;
+    private static boolean[] skippedRooms;
 
     //useful for other methods
     public static int[] getStartRoom() {
@@ -77,11 +78,11 @@ public class World {
     public static int getRoomHeight() {
         int height;
         if (rand.nextInt() % 3 == 0) {
-            height = 2;
+            height = 3;
         } else if (rand.nextInt() % 3 == 1) {
-            height = 4;
+            height = 5;
         } else {
-            height = 9;
+            height = 8;
         }
         return height;
     }
@@ -218,6 +219,7 @@ public class World {
     public static void makeRooms(TETile[][] world) { // actually make the rooms in the TETile
         chunks = getRoomNums();
         int[][] chunkLocations = chunkAreas(chunks);
+        skippedRooms = new boolean[chunks];
         int[][] roomLocations = getRoomLocations(chunkLocations);
 
         // Keep track of where rooms have been placed
@@ -264,6 +266,7 @@ public class World {
 
             // Skip this room if it's too small
             if (roomWidth <= 2 || roomHeight <= 2) {
+                skippedRooms[i] = true;
                 continue;
             }
 
@@ -301,6 +304,10 @@ public class World {
 
         // Add all rooms to the graph
         for (int id : roomMap.keySet()) {
+            int roomIndex = id - 1; // Convert room ID to array index
+            if (roomIndex >= 0 && roomIndex < skippedRooms.length && skippedRooms[roomIndex]) {
+                continue;
+            }
             HashMap<Integer, Integer> room = roomMap.get(id);
             int x = room.keySet().iterator().next();
             int y = room.get(x);
@@ -370,45 +377,85 @@ public class World {
         }
     }
 
+
     private static void createHallway(TETile[][] world, HashMap<Integer, Integer> room1, HashMap<Integer, Integer> room2) {
         Random tempRand = new Random(seed);
         int x1 = room1.keySet().iterator().next();
-        int y1 = room1.get(x1) + rand.nextInt(4) + 1;
+        int y1 = room1.get(x1) ;
         int x2 = room2.keySet().iterator().next();
-        int y2 = room2.get(x2) + rand.nextInt((2));
+        int y2 = room2.get(x2);
 
-        x1 += tempRand.nextInt(4) + 1;
-        x2 += tempRand.nextInt(2);
+        // Add random offset but ensure we don't go past walls
+        //x1 += Math.min(tempRand.nextInt(4) + 1, WIDTH - x1 - 3); // Stay within right boundary
+        x2 += Math.min(tempRand.nextInt(2), WIDTH - x2 - 2); // Stay within right boundary
 
-        // Create horizontal hallway first
-        int minX = Math.min(x1, x2);
-        int maxX = Math.max(x1, x2);
-        for (int x = minX; x <= maxX; x++) {
-            // Place floor tile
-            world[x][y1] = Tileset.FLOOR;
+        // Randomly decide if horizontal or vertical hallway should be created first
+        boolean horizontalFirst = new Random(seed + x1 + y1 + x2 + y2).nextBoolean();
 
-            // Place wall tiles above and below if they're not already floor tiles
-            if (y1 + 1 < HEIGHT && world[x][y1 + 1] != Tileset.FLOOR) {
-                world[x][y1 + 1] = Tileset.WALL;
+        // Create hallways in the determined order
+        if (horizontalFirst) {
+            // Create horizontal hallway first
+            int minX = Math.min(x1, x2);
+            int maxX = Math.max(x1, x2);
+            for (int x = minX; x <= maxX; x++) {
+                // Place floor tile
+                world[x][y1] = Tileset.FLOOR;
+
+                // Place wall tiles above and below if they're not already floor tiles
+                if (y1 + 1 < HEIGHT && world[x][y1 + 1] != Tileset.FLOOR) {
+                    world[x][y1 + 1] = Tileset.WALL;
+                }
+                if (y1 - 1 >= 0 && world[x][y1 - 1] != Tileset.FLOOR) {
+                    world[x][y1 - 1] = Tileset.WALL;
+                }
             }
-            if (y1 - 1 >= 0 && world[x][y1 - 1] != Tileset.FLOOR) {
-                world[x][y1 - 1] = Tileset.WALL;
-            }
-        }
 
-        // Create vertical hallway second
-        int minY = Math.min(y1, y2);
-        int maxY = Math.max(y1, y2);
-        for (int y = minY; y <= maxY; y++) {
-            // Place floor tile
-            world[x2][y] = Tileset.FLOOR;
+            // Create vertical hallway second
+            int minY = Math.min(y1, y2);
+            int maxY = Math.max(y1, y2);
+            for (int y = minY; y <= maxY; y++) {
+                // Place floor tile
+                world[x2][y] = Tileset.FLOOR;
 
-            // Place wall tiles to the left and right if they're not already floor tiles
-            if (x2 + 1 < WIDTH && world[x2 + 1][y] != Tileset.FLOOR) {
-                world[x2 + 1][y] = Tileset.WALL;
+                // Place wall tiles to the left and right if they're not already floor tiles
+                if (x2 + 1 < WIDTH && world[x2 + 1][y] != Tileset.FLOOR) {
+                    world[x2 + 1][y] = Tileset.WALL;
+                }
+                if (x2 - 1 >= 0 && world[x2 - 1][y] != Tileset.FLOOR) {
+                    world[x2 - 1][y] = Tileset.WALL;
+                }
             }
-            if (x2 - 1 >= 0 && world[x2 - 1][y] != Tileset.FLOOR) {
-                world[x2 - 1][y] = Tileset.WALL;
+        } else {
+            // Create vertical hallway first
+            int minY = Math.min(y1, y2);
+            int maxY = Math.max(y1, y2);
+            for (int y = minY; y <= maxY; y++) {
+                // Place floor tile
+                world[x1][y] = Tileset.FLOOR;
+
+                // Place wall tiles to the left and right if they're not already floor tiles
+                if (x1 + 1 < WIDTH && world[x1 + 1][y] != Tileset.FLOOR) {
+                    world[x1 + 1][y] = Tileset.WALL;
+                }
+                if (x1 - 1 >= 0 && world[x1 - 1][y] != Tileset.FLOOR) {
+                    world[x1 - 1][y] = Tileset.WALL;
+                }
+            }
+
+            // Create horizontal hallway second
+            int minX = Math.min(x1, x2);
+            int maxX = Math.max(x1, x2);
+            for (int x = minX; x <= maxX; x++) {
+                // Place floor tile
+                world[x][y2] = Tileset.FLOOR;
+
+                // Place wall tiles above and below if they're not already floor tiles
+                if (y2 + 1 < HEIGHT && world[x][y2 + 1] != Tileset.FLOOR) {
+                    world[x][y2 + 1] = Tileset.WALL;
+                }
+                if (y2 - 1 >= 0 && world[x][y2 - 1] != Tileset.FLOOR) {
+                    world[x][y2 - 1] = Tileset.WALL;
+                }
             }
         }
     }

@@ -26,10 +26,9 @@ public class MainMenu {
     public  void generateMenu() {
         int xCenter = Main.WIDTH / 2;
         int yCenter = Main.HEIGHT / 2;
-
-        StdDraw.setCanvasSize(Main.WIDTH * 16, Main.HEIGHT * 16);
-        StdDraw.setXscale(0, Main.WIDTH);
-        StdDraw.setYscale(0, Main.HEIGHT);
+        //StdDraw.setCanvasSize(Main.WIDTH * 16, Main.HEIGHT * 16);
+        //StdDraw.setXscale(0, Main.WIDTH);
+        //StdDraw.setYscale(0, Main.HEIGHT);
         StdDraw.clear(StdDraw.BLACK);
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setFont(titleFont);
@@ -39,7 +38,6 @@ public class MainMenu {
         StdDraw.text(xCenter, yCenter + 2, loadGame);
         StdDraw.text(xCenter, yCenter, quit);
         StdDraw.show();
-
         while (true){
             while (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
@@ -76,10 +74,16 @@ public class MainMenu {
                                 // Convert seed string to long
                                 long seed = Long.parseLong(seedBuilder.toString());
                                 World.changeSeed(seed);
+                            } else if (input == 's' || input == 'S') {
+                                TETile[][] newWorld = new TETile[Main.WIDTH][Main.HEIGHT];
+                                World.changeSeed(Long.parseLong(seedBuilder.toString()));
+                                World.makeNewWorld(newWorld);
+                                Main.worlds.add(newWorld);
+                                return;
+
                             }
                         }
                     }
-
                 } else if (key == 'l' || key == 'L') {
                     StdDraw.clear(StdDraw.BLACK);
                     StdDraw.setPenColor(StdDraw.WHITE);

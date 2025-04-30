@@ -10,13 +10,13 @@ public class Main {
     public static final int WIDTH = 60;
     public static final int HEIGHT = 45;
     public static final int HUD_HEIGHT = 2;
-    public static ArrayList<TETile[][]> worlds = new ArrayList<>(Saving.loadGameIndex() + 1);
-    public static int worldIndex = Saving.loadGameIndex();
-    public static TETile[][] sight = new TETile[WIDTH][HEIGHT];
-    public static TERenderer ter;
+    static ArrayList<TETile[][]> worlds = new ArrayList<>(Saving.loadGameIndex() + 1);
+    static int worldIndex = Saving.loadGameIndex();
+    static TETile[][] sight = new TETile[WIDTH][HEIGHT];
+    static TERenderer ter;
     static Metadata gameData = null;
 
-    public static void updateWorldIndex (int index) {
+    public static void updateWorldIndex(int index) {
         worldIndex = index;
     }
 
@@ -47,7 +47,7 @@ public class Main {
                 char key = StdDraw.nextKeyTyped();
                 gameData.addInput(key);
                 System.out.println(gameData.getInputs().toString());
-                if (World.getSightToggle()){
+                if (World.getSightToggle()) {
                     Avatar.moveAvatar(key, sight);
 
                 } else {
