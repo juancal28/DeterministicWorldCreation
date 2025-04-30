@@ -23,7 +23,7 @@ public class World {
     private static final int HEIGHT = Main.HEIGHT;
     private static int chunks;
     private static HashMap<Integer, HashMap<Integer, Integer>> roomMap = new HashMap<>(); // Map to store room coordinates
-    private static long seed = 4870229366887365062L; // Default seed
+    private static long seed = 5519969932840662953L; // Default seed
     private static Random rand = new Random(seed);
     private static int[] startRoom = new int[2];
     public static boolean sightToggle = false;
